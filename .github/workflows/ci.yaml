@@ -1,0 +1,15 @@
+name: BunExample
+on:
+  push:
+
+jobs:
+  bunexample:
+    name: Install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v0.1.8
+        with:
+          bun-version: latest
+      - run: bun install
+      - run: bun wiptest
