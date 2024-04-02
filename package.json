@@ -8,7 +8,8 @@
   "scripts": {
     "build": "bun build --entrypoints ./index.ts --outdir ./out --target bun",
     "start": "bun run index.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "testcov": "bun test --coverage"
   },
   "peerDependencies": {
     "typescript": "5.4.3"

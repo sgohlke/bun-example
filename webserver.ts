@@ -37,9 +37,7 @@ export function createAndStartWebserver(): Server {
           url: req.url,
           body: jsonBody,
           method: req.method,
-        })
-        console.log('jsonBody is', jsonBody)
-         
+        })         
         return new Response(JSON.stringify(result.executionResult));
         }
         return new Response(undefined, {status: 404});
