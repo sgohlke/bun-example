@@ -1,25 +1,51 @@
-import { PersonService } from "./PersonService";
+import { GraphQLServer, JsonLogger } from "@dreamit/graphql-server";
+import { userSchema, userSchemaResolvers } from "./ExampleSchemas";
+import type { Server } from "bun";
 
-Bun.serve({
-  fetch(req: Request) {
-    return new Response(JSON.stringify(PersonService.getAllPersons()))
-    //return new Response(`Echo: ${req.url}`);
-  },
+export function createAndStartWebserver(): Server {
 
-  // baseURI: "http://localhost:3000",
-
-  // this is called when fetch() throws or rejects
-  // error(err: Error) {
-  //   return new Response("uh oh! :(\n" + err.toString(), { status: 500 });
-  // },
-
-  // this boolean enables bun's default error handler
-  development: process.env.NODE_ENV !== "production",
-  // note: this isn't node, but for compatibility bun supports process.env + more stuff in process
-
-  // SSL is enabled if these two are set
-  // certFile: './cert.pem',
-  // keyFile: './key.pem',
-
-  port: 3000, // number or string
-});
+  const graphqlServer = new GraphQLServer(
+    {
+        schema: userSchema,
+        rootValue: userSchemaResolvers,
+        logger: new JsonLogger('bun-server', 'user-service')
+    }
+  )
+  
+  const server = Bun.serve({
+      port: 3000,
+      async fetch(req) {
+        const url = new URL(req.url);
+        if (url.pathname === "/metrics") {
+          const metricsResponse = await graphqlServer.getMetrics()
+          return new Response(metricsResponse, {headers: 
+           {
+            'content-type':  graphqlServer.getMetricsContentType() 
+           }
+          });
+        } else if (url.pathname === "/graphql") {
+          let jsonBody = undefined
+        try {
+          jsonBody = await req.json()
+        } catch (error) {
+          console.log('Cannot read body as json', error)
+        }
+  
+        const result = await graphqlServer.handleRequest({
+          //TODO: Check how req.headers can be used 
+          headers: {'content-type': 'application/json'},
+          url: req.url,
+          body: jsonBody,
+          method: req.method,
+        })
+        console.log('jsonBody is', jsonBody)
+         
+        return new Response(JSON.stringify(result.executionResult));
+        }
+        return new Response(undefined, {status: 404});
+      },
+    });
+    
+  console.log(`Listening on http://localhost:${server.port} ...`);
+  return server
+}

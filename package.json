@@ -1,1 +1,19 @@
-{ "dependencies": { "bun-types": "^0.5.0" } }
+{
+  "name": "bun-example",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "scripts": {
+    "build": "bun build --entrypoints ./index.ts --outdir ./out --target bun",
+    "start": "bun run index.ts",
+    "test": "bun test"
+  },
+  "peerDependencies": {
+    "typescript": "5.4.3"
+  },
+  "dependencies": {
+    "@dreamit/graphql-server": "4.8.0"
+  }
+}
